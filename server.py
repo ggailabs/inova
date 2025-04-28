@@ -29,33 +29,45 @@ def consultar_meteorologia(data: str, hora: str):
     }
 
 @app.get("/solo")
-def consultar_analise_solo(ponto: int = 1):
+def consultar_analise_solo(ponto: int = 1, profundidade: str = "0 a 20 cm"):
     try:
         if df_solo.empty:
             return {"erro": "Sem dados de análise de solo disponíveis"}
 
+        # Converter colunas para string e remover espaços em branco
         df_solo['Ponto'] = df_solo['Ponto'].astype(str).str.strip()
         df_solo['Profundidade'] = df_solo['Profundidade'].astype(str).str.strip()
-
+        
+        # Filtrar os dados
         filtro = df_solo[
             (df_solo['Ponto'] == str(ponto)) & 
-            (df_solo['Profundidade'] == "0 a 20 cm")
+            (df_solo['Profundidade'] == profundidade.strip())
         ]
 
         if filtro.empty:
-            return {"erro": f"Sem dados para o Ponto {ponto} na profundidade 0 a 20 cm"}
+            return {"erro": f"Sem dados para o Ponto {ponto} na profundidade {profundidade}"}
 
         row = filtro.iloc[0]
 
+        # Retornar um dicionário mais completo com todos os parâmetros do solo
         return {
             "talhao": row.get('Talhão', 'N/A'),
             "ponto": row.get('Ponto', 'N/A'),
             "profundidade": row.get('Profundidade', 'N/A'),
-            "pH": row.get('pH CaCl2', 'N/A'),
-            "MO": row.get('M.O. [g/dm³]', 'N/A'),
-            "P": row.get('P (r) [mg/dm³]', 'N/A'),
-            "K": row.get('K [mmolc/dm³]', 'N/A')
+            "pH_CaCl2": row.get('pH CaCl2', 'N/A'),
+            "materia_organica": row.get('M.O. [g/dm³]', 'N/A'),
+            "fosforo": row.get('P (r) [mg/dm³]', 'N/A'),
+            "potassio": row.get('K [mmolc/dm³]', 'N/A'),
+            "calcio": row.get('Ca [mmolc/dm³]', 'N/A'),
+            "magnesio": row.get('Mg [mmolc/dm³]', 'N/A'),
+            "ctc": row.get('C.T.C. [mmolc/dm³]', 'N/A'),
+            "saturacao_bases": row.get('V% [%]', 'N/A'),
+            "enxofre": row.get('S [mg/dm³]', 'N/A'),
+            "boro": row.get('B [mg/dm³]', 'N/A'),
+            "k_ctc": row.get('K na CTC [%]', 'N/A'),
+            "ca_ctc": row.get('Ca na CTC [%]', 'N/A'),
+            "mg_ctc": row.get('Mg na CTC [%]', 'N/A'),
+            "argila": row.get('Argila [g/kg]', 'N/A')
         }
     except Exception as e:
         return {"erro": f"Erro ao processar análise de solo: {str(e)}"}
-
