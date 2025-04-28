@@ -9,4 +9,5 @@ COPY server.py /app/server.py
 
 EXPOSE 8000
 
-CMD ["mcp", "dev", "server.py"]
+CMD ["python", "server.py"]
+
