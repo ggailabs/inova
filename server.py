@@ -27,7 +27,7 @@ def consultar_meteorologia(data: str, hora: str):
         "chuva": row['Chuva (mm)']
     }
 
-@app.get("/analise_solo")
+@app.get("/solo")
 def consultar_analise_solo(ponto: int = 1):
     try:
         if df_solo.empty:
