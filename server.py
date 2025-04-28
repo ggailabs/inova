@@ -3,7 +3,6 @@ import pandas as pd
 
 app = FastAPI()
 
-# URLs dos CSVs
 URL_SOLO = 'https://inova.ggailabs.com/dados/CA01.csv'
 URL_METEO = 'https://inova.ggailabs.com/dados/dados.csv'
 
@@ -12,30 +11,38 @@ df_meteo = pd.read_csv(URL_METEO, sep=';')
 
 @app.get("/consultar_meteorologia")
 def consultar_meteorologia(data: str, hora: str):
-    filtro = df_meteo[(df_meteo['Data'] == data) & (df_meteo['Hora (UTC)'] == hora)]
+    hora_formatada = hora.zfill(4)  # Garante 4 dígitos
+    filtro = df_meteo[
+        (df_meteo['Data'].str.strip() == data) &
+        (df_meteo['Hora (UTC)'].astype(str).str.zfill(4) == hora_formatada)
+    ]
     if filtro.empty:
-        return {"erro": f"Sem dados para {data} às {hora}h"}
+        return {"erro": f"Sem dados para {data} às {hora_formatada}h"}
     row = filtro.iloc[0]
     return {
         "data": data,
-        "hora": hora,
+        "hora": hora_formatada,
         "temperatura": row['Temp. Ins. (C)'],
         "umidade": row['Umi. Ins. (%)'],
         "chuva": row['Chuva (mm)']
     }
 
 @app.get("/consultar_analise_solo")
-def consultar_analise_solo(talhao: str):
-    if 'Talhão' not in df_solo.columns:
-        return {"erro": "Coluna 'Talhão' não encontrada"}
-    filtro = df_solo[df_solo['Talhão'] == talhao]
+def consultar_analise_solo():
+    if df_solo.empty:
+        return {"erro": "Sem dados de análise de solo disponíveis"}
+    # Pega sempre o Ponto 1, 0 a 20 cm
+    filtro = df_solo[(df_solo['Ponto'] == 1) & (df_solo['Profundidade'] == "0 a 20 cm")]
     if filtro.empty:
-        return {"erro": f"Sem análise para o talhão {talhao}"}
-    row = filtro.iloc[0]
+        filtro = df_solo.iloc[0]  # Se não achar, pega o primeiro disponível
+    else:
+        filtro = filtro.iloc[0]
     return {
-        "talhao": talhao,
-        "pH": row.get('pH', 'N/A'),
-        "MO": row.get('MO', 'N/A'),
-        "P": row.get('P', 'N/A'),
-        "K": row.get('K', 'N/A')
+        "talhao": filtro['Talhão'],
+        "ponto": filtro['Ponto'],
+        "profundidade": filtro['Profundidade'],
+        "pH": filtro['pH CaCl2'],
+        "MO": filtro['M.O. [g/dm³]'],
+        "P": filtro['P (r) [mg/dm³]'],
+        "K": filtro['K [mmolc/dm³]']
     }
