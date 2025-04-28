@@ -11,10 +11,11 @@ df_meteo = pd.read_csv(URL_METEO, sep=';')
 
 @app.get("/meteo")
 def consultar_meteorologia(data: str, hora: str):
-    hora_formatada = hora.zfill(4)  # Garante 4 dígitos
+    hora_formatada = str(int(hora)).zfill(4)  # Garante que qualquer número vire 4 dígitos
+    df_meteo['Hora (UTC)'] = df_meteo['Hora (UTC)'].astype(str).str.zfill(4)
     filtro = df_meteo[
         (df_meteo['Data'].str.strip() == data) &
-        (df_meteo['Hora (UTC)'].astype(str).str.strip().str.zfill(4) == hora_formatada)
+        (df_meteo['Hora (UTC)'] == hora_formatada)
     ]
     if filtro.empty:
         return {"erro": f"Sem dados para {data} às {hora_formatada}h"}
@@ -33,11 +34,9 @@ def consultar_analise_solo(ponto: int = 1):
         if df_solo.empty:
             return {"erro": "Sem dados de análise de solo disponíveis"}
 
-        # Garantir que Ponto e Profundidade sejam strings para comparação
         df_solo['Ponto'] = df_solo['Ponto'].astype(str).str.strip()
         df_solo['Profundidade'] = df_solo['Profundidade'].astype(str).str.strip()
 
-        # Filtra pelo ponto informado e profundidade padrão "0 a 20 cm"
         filtro = df_solo[
             (df_solo['Ponto'] == str(ponto)) & 
             (df_solo['Profundidade'] == "0 a 20 cm")
