@@ -46,9 +46,31 @@ inova/
 └── server.py
 ```
 
-## 🤝 Contribuição
+O **AgroCultivia** é uma API RESTful desenvolvida com FastAPI para fornecer dados de análise de solo e meteorológicos para agricultura de precisão.
 
-Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou enviar pull requests.
+### Endpoints Disponíveis
+
+#### Análise de Solo
+- `GET /solo/opcoes` - Lista pontos e profundidades disponíveis
+- `GET /solo` - Retorna análise completa do solo
+
+#### Dados Meteorológicos
+- `GET /meteo` - Consulta condições climáticas
+
+## 🔍 Detalhes dos Endpoints
+
+### Análise de Solo
+
+#### `GET /solo/opcoes`
+**Descrição:** Lista todos os pontos e profundidades disponíveis para consulta.
+
+**Exemplo de Resposta:**
+```json
+{
+  "pontos_disponiveis": ["1", "2", "3"],
+  "profundidades_disponiveis": ["0-20cm", "20-40cm"],
+  "exemplo_uso": "/solo?ponto=1&profundidade=0-20cm"
+}
 
 ## 📄 Licença
 
